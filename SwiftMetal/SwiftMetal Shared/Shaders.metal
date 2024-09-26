@@ -2,11 +2,17 @@
 
 using namespace metal;
 
+struct customVertex{
+    float2 position;
+    float3 color;
+};
+
+
 /// executed for every vertex
 //vid : Vertex Index
 //vertices : vertex buffer. On CPU defined as float[6] can be interpreted here ad float2[3] without cast
-vertex float4 vertexFunction(uint vid [[vertex_id]], constant float2* vertices [[buffer(0)]]) {
-    return float4(vertices[vid], 0.0, 1.0);
+vertex float4 vertexFunction(uint vid [[vertex_id]], constant customVertex* vertices [[buffer(0)]]) {
+    return float4(vertices[vid].position, 0.0, 1.0);
 }
 
 /// Return RGBA color of the pixel

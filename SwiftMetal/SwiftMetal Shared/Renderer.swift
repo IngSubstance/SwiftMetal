@@ -2,6 +2,12 @@ import Metal
 import MetalKit
 import simd
 
+struct Vertex {
+    //use simd, to match with shader's type
+    var position : simd_float2
+    var color : simd_float3
+}
+
 class Renderer: NSObject, MTKViewDelegate {
     /// GPU handle
     var device: MTLDevice
@@ -38,7 +44,11 @@ class Renderer: NSObject, MTKViewDelegate {
         }
          
         ///Create Vertex Buffer
-        let vertices: [Float] = [ -0.5, -0.5, 0.5, -0.5, 0.0, 0.5]
+        let vertices: [Vertex] = [
+            Vertex(position: simd_float2(-0.5,-0.5), color: simd_float3(1.0,0.0,0.0)),
+            Vertex(position: simd_float2(0.5,-0.5), color: simd_float3(0.0,1.0,0.0)),
+            Vertex(position: simd_float2(0.0, 0.5), color: simd_float3(0.0,0.0,1.0))
+        ]
         self.vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout.stride(ofValue: vertices[0]), options: MTLResourceOptions.storageModeShared)!
     }
 
