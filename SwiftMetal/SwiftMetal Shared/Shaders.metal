@@ -3,8 +3,8 @@
 using namespace metal;
 
 struct customVertex{
-    float2 position;
-    float3 color;
+    float2 position [[attribute(0)]];
+    float3 color [[attribute(1)]];
 };
 
 struct customVertexOut{
@@ -15,12 +15,11 @@ struct customVertexOut{
 
 
 /// executed for every vertex
-//vid : Vertex Index
 //vertices : vertex buffer. On CPU defined as float[6] can be interpreted here ad float2[3] without cast
-vertex customVertexOut vertexFunction(uint vid [[vertex_id]], constant customVertex* vertices [[buffer(0)]]) {
+vertex customVertexOut vertexFunction(customVertex vertices [[stage_in]]) {
     customVertexOut out;
-    out.position = float4(vertices[vid].position, 0.0, 1.0);
-    out.color = vertices[vid].color;
+    out.position = float4(vertices.position, 0.0, 1.0);
+    out.color = vertices.color;
     
     return out;
 }

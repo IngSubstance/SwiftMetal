@@ -19,10 +19,30 @@ class Renderer: NSObject, MTKViewDelegate {
     var fragmentFunction : MTLFunction
     var renderPipelineState: MTLRenderPipelineState?
     var vertexBuffer : MTLBuffer
+    var vertexDescriptor : MTLVertexDescriptor
     
     init?(metalKitView: MTKView) {
         self.device = metalKitView.device!
         self.commandQueue = self.device.makeCommandQueue()!
+        
+        //vertex descriptors
+        self.vertexDescriptor = MTLVertexDescriptor()
+        
+        vertexDescriptor.layouts[30].stride = MemoryLayout<Vertex>.stride
+        vertexDescriptor.layouts[30].stepRate = 1
+        vertexDescriptor.layouts[30].stepFunction = MTLVertexStepFunction.perVertex
+        
+        //position attriubute
+        vertexDescriptor.attributes[0].format = MTLVertexFormat.float2
+        vertexDescriptor.attributes[0].offset = MemoryLayout.offset(of: \Vertex.position)!
+        vertexDescriptor.attributes[0].bufferIndex = 30
+        
+        //color attribute
+        vertexDescriptor.attributes[1].format = MTLVertexFormat.float3
+        vertexDescriptor.attributes[1].offset = MemoryLayout.offset(of: \Vertex.color)!
+        vertexDescriptor.attributes[1].bufferIndex = 30
+        
+        
         
         //compile Shaders.metal file
         self.library = device.makeDefaultLibrary()!
@@ -31,9 +51,10 @@ class Renderer: NSObject, MTKViewDelegate {
         
         ///Create Rendering Pipeline State
         ///Object that old hte compilaed shader and other relates information
-        var renderPipelineStateDescriptor = MTLRenderPipelineDescriptor()
+        let renderPipelineStateDescriptor = MTLRenderPipelineDescriptor()
         renderPipelineStateDescriptor.vertexFunction = vertexFunction
         renderPipelineStateDescriptor.fragmentFunction = fragmentFunction
+        renderPipelineStateDescriptor.vertexDescriptor = vertexDescriptor
         ///Pixel format rgb10a2 means that each pixel will have 10 bits for R, G and B and 2 bits for Alpha
         renderPipelineStateDescriptor.colorAttachments[0].pixelFormat = metalKitView.colorPixelFormat
         do{
@@ -43,7 +64,7 @@ class Renderer: NSObject, MTKViewDelegate {
             print("Failed to create render pipeline state")
         }
          
-        ///Create Vertex Buffer
+        ///Create Vertex Buffer for a Quad
         let vertices: [Vertex] = [
             Vertex(position: simd_float2(-0.5,-0.5), color: simd_float3(1.0,0.0,0.0)),
             Vertex(position: simd_float2(0.5,-0.5), color: simd_float3(0.0,1.0,0.0)),
@@ -65,8 +86,8 @@ class Renderer: NSObject, MTKViewDelegate {
         //Bind render pipeline state
         renderEncode.setRenderPipelineState(self.renderPipelineState!)
         
-        //Bind vertex buffer
-        renderEncode.setVertexBuffer(self.vertexBuffer, offset: 0, index: 0)
+        //Bind vertex buffer.  Index 30 is the highest buffer index, chosed to left free the 0th
+        renderEncode.setVertexBuffer(self.vertexBuffer, offset: 0, index: 30)
         
         //Render
         renderEncode.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 3)
