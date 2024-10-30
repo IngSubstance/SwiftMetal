@@ -66,9 +66,12 @@ class Renderer: NSObject, MTKViewDelegate {
          
         ///Create Vertex Buffer for a Quad
         let vertices: [Vertex] = [
-            Vertex(position: simd_float2(-0.5,-0.5), color: simd_float3(1.0,0.0,0.0)),
-            Vertex(position: simd_float2(0.5,-0.5), color: simd_float3(0.0,1.0,0.0)),
-            Vertex(position: simd_float2(0.0, 0.5), color: simd_float3(0.0,0.0,1.0))
+            Vertex(position: simd_float2(-0.5, -0.5), color: simd_float3(1.0, 0.0, 0.0)), //vertex 0
+            Vertex(position: simd_float2( 0.5, -0.5), color: simd_float3(0.0, 1.0, 0.0)), //vertex 1
+            Vertex(position: simd_float2( 0.5,  0.5), color: simd_float3(0.0, 0.0, 1.0)), //vertex 2
+            Vertex(position: simd_float2(-0.5, -0.5), color: simd_float3(1.0, 0.0, 0.0)), //vertex 0
+            Vertex(position: simd_float2( 0.5,  0.5), color: simd_float3(0.0, 0.0, 1.0)), //vertex 2
+            Vertex(position: simd_float2(-0.5,  0.5), color: simd_float3(1.0, 0.0, 1.0))  //vertex 3
         ]
         self.vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout.stride(ofValue: vertices[0]), options: MTLResourceOptions.storageModeShared)!
     }
@@ -90,7 +93,7 @@ class Renderer: NSObject, MTKViewDelegate {
         renderEncode.setVertexBuffer(self.vertexBuffer, offset: 0, index: 30)
         
         //Render
-        renderEncode.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 3)
+        renderEncode.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 6)
         
         renderEncode.endEncoding()
         
