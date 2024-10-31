@@ -19,6 +19,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var fragmentFunction : MTLFunction
     var renderPipelineState: MTLRenderPipelineState?
     var vertexBuffer : MTLBuffer
+    var indexBuffer : MTLBuffer
     var vertexDescriptor : MTLVertexDescriptor
     
     init?(metalKitView: MTKView) {
@@ -69,11 +70,17 @@ class Renderer: NSObject, MTKViewDelegate {
             Vertex(position: simd_float2(-0.5, -0.5), color: simd_float3(1.0, 0.0, 0.0)), //vertex 0
             Vertex(position: simd_float2( 0.5, -0.5), color: simd_float3(0.0, 1.0, 0.0)), //vertex 1
             Vertex(position: simd_float2( 0.5,  0.5), color: simd_float3(0.0, 0.0, 1.0)), //vertex 2
-            Vertex(position: simd_float2(-0.5, -0.5), color: simd_float3(1.0, 0.0, 0.0)), //vertex 0
-            Vertex(position: simd_float2( 0.5,  0.5), color: simd_float3(0.0, 0.0, 1.0)), //vertex 2
             Vertex(position: simd_float2(-0.5,  0.5), color: simd_float3(1.0, 0.0, 1.0))  //vertex 3
         ]
         self.vertexBuffer = device.makeBuffer(bytes: vertices, length: vertices.count * MemoryLayout.stride(ofValue: vertices[0]), options: MTLResourceOptions.storageModeShared)!
+        
+        ///Create Index Buffer uint16 because the indexType of drawIndexedPrimitives
+        let indices: [uint16] = [
+            0, 1, 2,
+            0, 2, 3
+        ]
+        
+        self.indexBuffer = self.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout.stride(ofValue: indices[0]), options: MTLResourceOptions.storageModeShared)!
     }
 
     func draw(in view: MTKView) {
@@ -93,7 +100,7 @@ class Renderer: NSObject, MTKViewDelegate {
         renderEncode.setVertexBuffer(self.vertexBuffer, offset: 0, index: 30)
         
         //Render
-        renderEncode.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 6)
+        renderEncode.drawIndexedPrimitives(type: MTLPrimitiveType.triangle, indexCount: 6, indexType: MTLIndexType.uint16, indexBuffer: indexBuffer, indexBufferOffset: 0)
         
         renderEncode.endEncoding()
         
