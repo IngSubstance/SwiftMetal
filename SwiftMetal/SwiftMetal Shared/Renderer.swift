@@ -21,6 +21,7 @@ class Renderer: NSObject, MTKViewDelegate {
     var vertexBuffer : MTLBuffer
     var indexBuffer : MTLBuffer
     var vertexDescriptor : MTLVertexDescriptor
+    var colorTexture : MTLTexture?
     
     init?(metalKitView: MTKView) {
         self.device = metalKitView.device!
@@ -81,6 +82,15 @@ class Renderer: NSObject, MTKViewDelegate {
         ]
         
         self.indexBuffer = self.device.makeBuffer(bytes: indices, length: indices.count * MemoryLayout.stride(ofValue: indices[0]), options: MTLResourceOptions.storageModeShared)!
+        
+        let loader = MTKTextureLoader(device: device)
+        do{
+            ///Bundle.main refers to the app’s main bundle, where resources like images, audio files, and other assets are stored.
+            let url = Bundle.main.url(forResource: "ZuruLogo", withExtension: "jpeg")
+            self.colorTexture = try loader.newTexture(URL: url!, options: nil)
+        } catch{
+            print("Failed to load texture")
+        }
     }
 
     func draw(in view: MTKView) {
